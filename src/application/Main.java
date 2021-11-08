@@ -18,8 +18,7 @@ public class Main {
         ChessMatch chessMatch = new ChessMatch();
         List<ChessPiece> captured = new ArrayList<>();
 
-        // Using this loop as placeholder until Check is implemented.
-        while(true){
+        while(!chessMatch.getCheckmate()){
             try{
                 UI.clearScreen();
                 UI.printMatch(chessMatch, captured);
@@ -45,5 +44,7 @@ public class Main {
                 scan.nextLine();
             }
         }
+        UI.clearScreen();
+        UI.printMatch(chessMatch, captured);
     }
 }
