@@ -2,13 +2,17 @@ package chess.pieces;
 
 import board.Board;
 import board.Position;
+import chess.ChessMatch;
 import chess.ChessPiece;
 import chess.Color;
 
 public class Pawn extends ChessPiece {
 
-    public Pawn(Board board, Color color) {
+    private ChessMatch chessMatch;
+
+    public Pawn(Board board, Color color, ChessMatch chessMatch) {
         super(board, color);
+        this.chessMatch = chessMatch;
     }
 
     @Override
@@ -21,16 +25,18 @@ public class Pawn extends ChessPiece {
         boolean [][] mat = new boolean[getBoard().getRows()][getBoard().getColumns()];
         Position p = new Position(0, 0);
         Position p2 = new Position(0, 0);
-        int oneMove, twoMoves;
+        int oneMove, twoMoves, enPassantRow;
 
 
         if(getColor() == Color.WHITE){
             oneMove = -1;
             twoMoves = -2;
+            enPassantRow = 3;
         }
         else {
             oneMove = 1;
             twoMoves = 2;
+            enPassantRow = 4;
         }
 
         // Basic Pawn move
@@ -53,6 +59,22 @@ public class Pawn extends ChessPiece {
         // Capture to the right
         p.setValues(position.getRow() + oneMove, position.getColumn() + 1);
         if(getBoard().positionExists(p) && isThereOpponentPiece(p)) mat[p.getRow()][p.getColumn()] = true;
+
+        // En passant
+        if(position.getRow() == enPassantRow){
+
+            // Opponent pawn on the left is vulnerable
+            Position left = new Position(position.getRow(), position.getColumn() - 1);
+            if(getBoard().positionExists(left) && isThereOpponentPiece(left) && getBoard().piece(left) == chessMatch.getEnPassantVulnerable()){
+                mat[left.getRow() + oneMove][left.getColumn()] = true;
+            }
+
+            // Opponent pawn on the right is vulnerable
+            Position right = new Position(position.getRow(), position.getColumn() + 1);
+            if(getBoard().positionExists(right) && isThereOpponentPiece(right) && getBoard().piece(right) == chessMatch.getEnPassantVulnerable()){
+                mat[left.getRow() + oneMove][left.getColumn()] = true;
+            }
+        }
 
         return mat;
     }
