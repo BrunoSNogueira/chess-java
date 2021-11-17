@@ -78,7 +78,7 @@ public class ChessMatch {
         validateTargetPosition(source, target);
         Piece capturedPiece = makeMove(source, target);
 
-        if(testCheck(currentPlayer)){
+        if(testCheck(currentPlayer) || testIllegalCastling(source, target)){
             undoMove(source, target, capturedPiece);
             throw new ChessException("You can't put yourself in check");
         }
@@ -108,7 +108,36 @@ public class ChessMatch {
         return (ChessPiece)capturedPiece;
     }
 
-    public ChessPiece replacePromotedPiece(String type) {
+    private boolean testIllegalCastling(Position source, Position target) {
+
+        ChessPiece movedPiece = (ChessPiece) board.piece(target);
+
+        boolean isIllegal = false;
+
+        // position in-between
+        Position inBet = new Position(source.getRow(),
+                (source.getColumn() > target.getColumn()) ? source.getColumn() - 1 : target.getColumn() - 1);
+
+        // identifies if a king has moved
+        if (movedPiece instanceof King) {
+            // identifies if a king has castled, once it moved two squares away
+            if (Math.abs(source.getColumn() - target.getColumn()) == 2) {
+                // checks if the position passed through by the king is attacked
+                Piece capturedPiece = makeMove(target, inBet);
+
+                if (testCheck(currentPlayer)) {
+                    isIllegal = true;
+                }
+
+
+                undoMove(target, inBet, capturedPiece);
+            }
+        }
+        return isIllegal;
+    }
+
+
+        public ChessPiece replacePromotedPiece(String type) {
         if(promoted == null) throw new IllegalStateException("There is no piece to be promoted");
         if(!type.equals("B") && !type.equals("N") && !type.equals("R") && !type.equals("Q") )
             throw new InvalidParameterException("Invalid type for promotion");
